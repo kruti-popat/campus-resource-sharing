@@ -111,6 +111,7 @@ GET /api/ratings
 POST /api/ratings
 GET /api/ratings/user/{userId}
 ## 🔧 Configuration
+```
 
 Configure database connection in `src/main/resources/application.properties`
 
