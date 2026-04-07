@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Campus Resource Sharing</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=5">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-logo">Campus Resource Sharing</h1>
+            <div class="nav-user">
+                <span id="userName">User</span>
+                <span id="userRating" class="user-rating-badge"></span>
+                <button onclick="showProfileModal()" class="btn btn-primary">👤 Profile</button>
+                <button onclick="handleLogout()" class="btn btn-secondary">Logout</button>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="dashboard-header">
+            <h2>Available Resources</h2>
+            <button onclick="showAddResourceModal()" class="btn btn-primary">+ Add Resource</button>
+        </div>
+        
+        <div class="filter-section">
+            <label for="categoryFilter">Filter by Category:</label>
+            <select id="categoryFilter" onchange="filterResources()">
+                <option value="">All Categories</option>
+                <option value="Books">Books</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Furniture">Furniture</option>
+                <option value="Sports">Sports</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+        
+        <div id="resourcesContainer" class="resources-grid">
+            <!-- Resources will be loaded here -->
+        </div>
+        
+        <div class="tabs-section">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('myResources')">My Resources</button>
+                <button class="tab-btn" onclick="showTab('myRequests')">My Requests</button>
+                <button class="tab-btn" onclick="showTab('receivedRequests')">Received Requests <span id="receivedBadge" class="tab-badge"></span></button>
+            </div>
+            
+            <div id="myResources" class="tab-content active">
+                <h3>My Resources</h3>
+                <div id="myResourcesContainer" class="resources-grid">
+                    <!-- User's resources will be loaded here -->
+                </div>
+            </div>
+            
+            <div id="myRequests" class="tab-content">
+                <h3>My Requests</h3>
+                <div id="myRequestsContainer" class="requests-list">
+                    <!-- User's requests will be loaded here -->
+                </div>
+            </div>
+            
+            <div id="receivedRequests" class="tab-content">
+                <h3>Received Requests</h3>
+                <div id="receivedRequestsContainer" class="requests-list">
+                    <!-- Received requests will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Resource Modal -->
+    <div id="addResourceModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddResourceModal()">&times;</span>
+            <h2>Add New Resource</h2>
+            <form id="addResourceForm" onsubmit="handleAddResource(event)">
+                <div class="form-group">
+                    <label for="resourceTitle">Title</label>
+                    <input type="text" id="resourceTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="resourceDescription">Description</label>
+                    <textarea id="resourceDescription" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="resourceCategory">Category</label>
+                    <select id="resourceCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="Books">Books</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Furniture">Furniture</option>
+                        <option value="Sports">Sports</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="resourceCondition">Condition</label>
+                    <select id="resourceCondition" required>
+                        <option value="">Select Condition</option>
+                        <option value="Excellent">Excellent</option>
+                        <option value="Good">Good</option>
+                        <option value="Fair">Fair</option>
+                        <option value="Poor">Poor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="transactionType">Transaction Type</label>
+                    <select id="transactionType" required onchange="handleTransactionTypeChange()">
+                        <option value="">Select Transaction Type</option>
+                        <option value="SELL">Sell</option>
+                        <option value="EXCHANGE">Exchange</option>
+                        <option value="RENT">Rent</option>
+                        <option value="DONATE">Donate</option>
+                    </select>
+                </div>
+                
+                <!-- Dynamic fields based on transaction type -->
+                <div id="sellFields" class="transaction-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="sellPrice">Selling Price (INR)</label>
+                        <input type="number" id="sellPrice" min="0" step="0.01" placeholder="Enter price in INR">
+                    </div>
+                </div>
+                
+                <div id="exchangeFields" class="transaction-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="exchangeDescription">What do you want in exchange?</label>
+                        <textarea id="exchangeDescription" rows="3" placeholder="Describe what resource you want in exchange..."></textarea>
+                    </div>
+                </div>
+                
+                <div id="rentFields" class="transaction-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="rentalDuration">Rental Duration</label>
+                        <select id="rentalDuration">
+                            <option value="">Select Duration</option>
+                            <option value="1 day">1 Day</option>
+                            <option value="1 week">1 Week</option>
+                            <option value="2 weeks">2 Weeks</option>
+                            <option value="1 month">1 Month</option>
+                            <option value="2 months">2 Months</option>
+                            <option value="3 months">3 Months</option>
+                            <option value="6 months">6 Months</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="rentPrice">Rental Price (INR)</label>
+                        <input type="number" id="rentPrice" min="0" step="0.01" placeholder="Enter rental price in INR">
+                    </div>
+                </div>
+                
+                <div id="donateFields" class="transaction-fields" style="display: none;">
+                    <p style="color: #34d399; font-weight: 500;">✓ This resource will be donated free of cost</p>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Add Resource</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Request Modal -->
+    <div id="requestModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRequestModal()">&times;</span>
+            <h2>Request Resource</h2>
+            <form onsubmit="handleCreateRequest(event)">
+                <div class="form-group">
+                    <label for="requestMessage">Message (Optional)</label>
+                    <textarea id="requestMessage" rows="4" placeholder="Add a message to the owner..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Send Request</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Chat Modal -->
+    <div id="chatModal" class="modal">
+        <div class="modal-content chat-modal-content">
+            <span class="close" onclick="closeChatModal()">&times;</span>
+            <h2 id="chatTitle">Chat</h2>
+            <div id="chatMessages" class="chat-messages">
+                <!-- Messages will be loaded here -->
+            </div>
+            <div class="chat-input-container">
+                <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="handleChatKeyPress(event)">
+                <button onclick="sendChatMessage()" class="btn btn-primary">Send</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Verification Modal -->
+    <div id="verificationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeVerificationModal()">&times;</span>
+            <h2>Resource Verification</h2>
+            <div id="verificationContent">
+                <!-- Verification content will be loaded here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content profile-modal-content">
+            <span class="close" onclick="closeProfileModal()">&times;</span>
+            <h2>👤 My Profile</h2>
+            <div id="profileContent">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="profileAvatar">U</div>
+                    <div class="profile-info">
+                        <h3 id="profileFullName">Loading...</h3>
+                        <p id="profileUsername">@username</p>
+                        <div class="profile-rating" id="profileRating"></div>
+                    </div>
+                </div>
+                <form id="profileForm" onsubmit="handleUpdateProfile(event)">
+                    <div class="form-group">
+                        <label for="profileFullNameInput">Full Name</label>
+                        <input type="text" id="profileFullNameInput" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="profilePhone">Phone</label>
+                        <input type="tel" id="profilePhone">
+                    </div>
+                    <div class="form-group">
+                        <label for="profileDepartment">Department</label>
+                        <select id="profileDepartment">
+                            <option value="">Select Department</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Mechanical">Mechanical</option>
+                            <option value="Civil">Civil</option>
+                            <option value="Electrical">Electrical</option>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="profileYear">Year</label>
+                        <select id="profileYear">
+                            <option value="">Select Year</option>
+                            <option value="1st Year">1st Year</option>
+                            <option value="2nd Year">2nd Year</option>
+                            <option value="3rd Year">3rd Year</option>
+                            <option value="4th Year">4th Year</option>
+                            <option value="Alumni">Alumni</option>
+                            <option value="Faculty">Faculty</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="profileBio">Bio</label>
+                        <textarea id="profileBio" rows="3" placeholder="Tell others about yourself..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+                <div class="profile-section">
+                    <h4>Recent Ratings</h4>
+                    <div id="profileRatings" class="ratings-list">
+                        <!-- Ratings will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- View User Profile Modal -->
+    <div id="viewProfileModal" class="modal">
+        <div class="modal-content profile-modal-content">
+            <span class="close" onclick="closeViewProfileModal()">&times;</span>
+            <h2>👤 User Profile</h2>
+            <div id="viewProfileContent">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="viewProfileAvatar">U</div>
+                    <div class="profile-info">
+                        <h3 id="viewProfileFullName">Loading...</h3>
+                        <p id="viewProfileUsername">@username</p>
+                        <div class="profile-rating" id="viewProfileRating"></div>
+                    </div>
+                </div>
+                <div class="profile-details">
+                    <p><strong>Department:</strong> <span id="viewProfileDepartment">-</span></p>
+                    <p><strong>Year:</strong> <span id="viewProfileYear">-</span></p>
+                    <p><strong>Bio:</strong> <span id="viewProfileBio">-</span></p>
+                    <p><strong>Member since:</strong> <span id="viewProfileMemberSince">-</span></p>
+                </div>
+                <div class="profile-section">
+                    <h4>Ratings & Reviews</h4>
+                    <div id="viewProfileRatings" class="ratings-list">
+                        <!-- Ratings will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Rating Modal -->
+    <div id="ratingModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRatingModal()">&times;</span>
+            <h2>⭐ Rate User</h2>
+            <form id="ratingForm" onsubmit="handleSubmitRating(event)">
+                <p id="ratingUserName" style="font-size: 1.1rem; margin-bottom: 20px;">Rate your experience with <strong></strong></p>
+                <div class="form-group">
+                    <label>Rating</label>
+                    <div class="star-rating" id="starRating">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                    <input type="hidden" id="ratingScore" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="ratingComment">Comment (Optional)</label>
+                    <textarea id="ratingComment" rows="3" placeholder="Share your experience..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit Rating</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="message" class="message"></div>
+    
+    <!-- Logout Confirmation -->
+    <div id="logoutConfirm" class="confirm-overlay">
+        <div class="confirm-box">
+            <h3>Confirm Logout</h3>
+            <p>Are you sure you want to log out?</p>
+            <div class="confirm-actions">
+                <button class="btn btn-secondary" onclick="closeLogoutConfirm()">Cancel</button>
+                <button class="btn btn-danger" onclick="confirmLogout()">Logout</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/app.js?v=5.0"></script>
+</body>
+</html>
