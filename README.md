@@ -61,10 +61,15 @@ Create MySQL database and update credentials in `src/main/resources/application.
 ## 📸 Screenshots
 
 ![Home](screenshots/home.png)
+
 ![Login](screenshots/otp.png)
+
 ![Add Resource](screenshots/add-item.png)
+
 ![Dashboard](screenshots/dashboard.png)
+
 ![Request: accept/reject](screenshots/request.png)
+
 ![Chat](screenshots/chat.png)
 
 ## 📡 API Documentation
