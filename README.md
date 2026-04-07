@@ -51,7 +51,7 @@ A modern, feature-rich web application that enables students to share, request, 
 
 ```bash
 # Clone and run
-git clone https://github.com/yourusername/campus-resource-sharing.git
+git clone https://github.com/kruti-popat/campus-resource-sharing.git
 cd campus-resource-sharing
 ./mvnw spring-boot:run
 ```
